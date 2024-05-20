@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/gamebtc/devicedetector/parser"
+	"github.com/gianluca-marchini/devicedetector/parser"
 )
 
 type ClientMatchResult struct {
