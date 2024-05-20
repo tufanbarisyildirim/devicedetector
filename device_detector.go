@@ -7,7 +7,7 @@ import (
 	regexp "github.com/dlclark/regexp2"
 	gover "github.com/mcuadros/go-version"
 
-	. "github.com/gamebtc/devicedetector/parser"
+	"github.com/gamebtc/devicedetector/parser"
 	"github.com/gamebtc/devicedetector/parser/client"
 	"github.com/gamebtc/devicedetector/parser/device"
 )
@@ -26,11 +26,11 @@ var desktopOsArray = []string{
 	`Chrome OS`,
 }
 
-var(
+var (
 	chrMobReg = regexp.MustCompile(fixUserAgentRegEx(`Chrome/[\.0-9]* Mobile`), regexp.IgnoreCase)
 	chrTabReg = regexp.MustCompile(fixUserAgentRegEx(`Chrome/[\.0-9]* (?!Mobile)`), regexp.IgnoreCase)
 	opaTabReg = regexp.MustCompile(fixUserAgentRegEx(`Opera Tablet`), regexp.IgnoreCase)
-	opaTvReg = regexp.MustCompile(fixUserAgentRegEx(`Opera TV Store`), regexp.IgnoreCase)
+	opaTvReg  = regexp.MustCompile(fixUserAgentRegEx(`Opera TV Store`), regexp.IgnoreCase)
 )
 
 func fixUserAgentRegEx(regex string) string {
@@ -40,28 +40,35 @@ func fixUserAgentRegEx(regex string) string {
 }
 
 type DeviceDetector struct {
+	cache                 *Cache
 	deviceParsers         []device.DeviceParser
 	clientParsers         []client.ClientParser
-	botParsers            []BotParser
-	osParsers             []OsParser
-	vendorParser          *VendorFragments
+	botParsers            []parser.BotParser
+	osParsers             []parser.OsParser
+	vendorParser          *parser.VendorFragments
 	DiscardBotInformation bool
 	SkipBotDetection      bool
 }
 
-func NewDeviceDetector(dir string) (*DeviceDetector, error) {
-	vp, err := NewVendor(filepath.Join(dir, FixtureFileVendor))
+func NewDeviceDetector(dir string, enableCache bool) (*DeviceDetector, error) {
+	vp, err := parser.NewVendor(filepath.Join(dir, parser.FixtureFileVendor))
 	if err != nil {
 		return nil, err
 	}
-	osp, err := NewOss(filepath.Join(dir, FixtureFileOs))
+
+	osp, err := parser.NewOss(filepath.Join(dir, parser.FixtureFileOs))
 	if err != nil {
 		return nil, err
 	}
 
 	d := &DeviceDetector{
+		cache:        nil,
 		vendorParser: vp,
-		osParsers:    []OsParser{osp},
+		osParsers:    []parser.OsParser{osp},
+	}
+
+	if enableCache {
+		d.cache = NewCache()
 	}
 
 	clientDir := filepath.Join(dir, "client")
@@ -86,10 +93,9 @@ func NewDeviceDetector(dir string) (*DeviceDetector, error) {
 			device.ParserNameMobile,
 		})
 
-	d.botParsers = []BotParser{
-		NewBot(filepath.Join(dir, FixtureFileBot)),
+	d.botParsers = []parser.BotParser{
+		parser.NewBot(filepath.Join(dir, parser.FixtureFileBot)),
 	}
-
 
 	return d, nil
 }
@@ -110,15 +116,15 @@ func (d *DeviceDetector) GetDeviceParsers() []device.DeviceParser {
 	return d.deviceParsers
 }
 
-func (d *DeviceDetector) AddBotParser(op BotParser) {
+func (d *DeviceDetector) AddBotParser(op parser.BotParser) {
 	d.botParsers = append(d.botParsers, op)
 }
 
-func (d *DeviceDetector) GetBotParsers() []BotParser {
+func (d *DeviceDetector) GetBotParsers() []parser.BotParser {
 	return d.botParsers
 }
 
-func (d *DeviceDetector) ParseBot(ua string) *BotMatchResult {
+func (d *DeviceDetector) ParseBot(ua string) *parser.BotMatchResult {
 	if !d.SkipBotDetection {
 		for _, parser := range d.botParsers {
 			parser.DiscardDetails(d.DiscardBotInformation)
@@ -130,7 +136,7 @@ func (d *DeviceDetector) ParseBot(ua string) *BotMatchResult {
 	return nil
 }
 
-func (d *DeviceDetector) ParseOs(ua string) *OsMatchResult {
+func (d *DeviceDetector) ParseOs(ua string) *parser.OsMatchResult {
 	for _, p := range d.osParsers {
 		if r := p.Parse(ua); r != nil {
 			return r
@@ -171,7 +177,7 @@ func (d *DeviceDetector) parseInfo(info *DeviceInfo) {
 
 	os := info.GetOs()
 	osShortName := os.ShortName
-	osFamily := GetOsFamily(osShortName)
+	osFamily := parser.GetOsFamily(osShortName)
 	osVersion := os.Version
 	cmr := info.GetClient()
 
@@ -179,82 +185,97 @@ func (d *DeviceDetector) parseInfo(info *DeviceInfo) {
 		info.Brand = `AP`
 	}
 
-	deviceType := GetDeviceType(info.Type)
+	deviceType := parser.GetDeviceType(info.Type)
 	// Chrome on Android passes the device type based on the keyword 'Mobile'
 	// If it is present the device should be a smartphone, otherwise it's a tablet
 	// See https://developer.chrome.com/multidevice/user-agent#chrome_for_android_user_agent
-	if deviceType == DEVICE_TYPE_INVALID && osFamily == `Android` {
-		if browserName,ok:=client.GetBrowserFamily(cmr.ShortName); ok&&browserName== `Chrome` {
+	if deviceType == parser.DEVICE_TYPE_INVALID && osFamily == `Android` {
+		if browserName, ok := client.GetBrowserFamily(cmr.ShortName); ok && browserName == `Chrome` {
 			if ok, _ := chrMobReg.MatchString(ua); ok {
-				deviceType = DEVICE_TYPE_SMARTPHONE
+				deviceType = parser.DEVICE_TYPE_SMARTPHONE
 			} else if ok, _ = chrTabReg.MatchString(ua); ok {
-				deviceType = DEVICE_TYPE_TABLET
+				deviceType = parser.DEVICE_TYPE_TABLET
 			}
 		}
 	}
 
-	if deviceType == DEVICE_TYPE_INVALID {
+	if deviceType == parser.DEVICE_TYPE_INVALID {
 		if info.HasAndroidMobileFragment() {
-			deviceType = DEVICE_TYPE_TABLET
+			deviceType = parser.DEVICE_TYPE_TABLET
 		} else if ok, _ := opaTabReg.MatchString(ua); ok {
-			deviceType = DEVICE_TYPE_TABLET
+			deviceType = parser.DEVICE_TYPE_TABLET
 		} else if info.HasAndroidMobileFragment() {
-			deviceType = DEVICE_TYPE_SMARTPHONE
+			deviceType = parser.DEVICE_TYPE_SMARTPHONE
 		} else if osShortName == "AND" && osVersion != "" {
 			if gover.CompareSimple(osVersion, `2.0`) == -1 {
-				deviceType = DEVICE_TYPE_SMARTPHONE
+				deviceType = parser.DEVICE_TYPE_SMARTPHONE
 			} else if gover.CompareSimple(osVersion, `3.0`) >= 0 &&
 				gover.CompareSimple(osVersion, `4.0`) == -1 {
-				deviceType = DEVICE_TYPE_TABLET
+				deviceType = parser.DEVICE_TYPE_TABLET
 			}
 		}
 	}
 
 	// All detected feature phones running android are more likely a smartphone
-	if deviceType == DEVICE_TYPE_FEATURE_PHONE && osFamily == `Android` {
-		deviceType = DEVICE_TYPE_SMARTPHONE
+	if deviceType == parser.DEVICE_TYPE_FEATURE_PHONE && osFamily == `Android` {
+		deviceType = parser.DEVICE_TYPE_SMARTPHONE
 	}
 
 	// According to http://msdn.microsoft.com/en-us/library/ie/hh920767(v=vs.85).aspx
-	if deviceType == DEVICE_TYPE_INVALID &&
+	if deviceType == parser.DEVICE_TYPE_INVALID &&
 		(osShortName == `WRT` || (osShortName == `WIN` && gover.CompareSimple(osVersion, `8`) >= 0)) &&
 		info.IsTouchEnabled() {
-		deviceType = DEVICE_TYPE_TABLET
+		deviceType = parser.DEVICE_TYPE_TABLET
 	}
 
 	// All devices running Opera TV Store are assumed to be a tv
 	if ok, _ := opaTvReg.MatchString(ua); ok {
-		deviceType = DEVICE_TYPE_TV
+		deviceType = parser.DEVICE_TYPE_TV
 	}
 
 	// Devices running Kylo or Espital TV Browsers are assumed to be a TV
-	if deviceType == DEVICE_TYPE_INVALID {
+	if deviceType == parser.DEVICE_TYPE_INVALID {
 		if cmr.Name == `Kylo` || cmr.Name == `Espial TV Browser` {
-			deviceType = DEVICE_TYPE_TV
+			deviceType = parser.DEVICE_TYPE_TV
 		} else if info.IsDesktop() {
-			deviceType = DEVICE_TYPE_DESKTOP
+			deviceType = parser.DEVICE_TYPE_DESKTOP
 		}
 	}
 
-	if deviceType != DEVICE_TYPE_INVALID {
-		info.Type = GetDeviceName(deviceType)
+	if deviceType != parser.DEVICE_TYPE_INVALID {
+		info.Type = parser.GetDeviceName(deviceType)
 	}
-	return
+}
+
+func (d *DeviceDetector) cacheDeviceInfo(ua string, deviceInfo *DeviceInfo) *DeviceInfo {
+	if d.cache != nil {
+		d.cache.Add(ua, deviceInfo)
+	}
+
+	return deviceInfo
 }
 
 func (d *DeviceDetector) Parse(ua string) *DeviceInfo {
-	// skip parsing for empty useragents or those not containing any letter
-	if !StringContainsLetter(ua) {
+	// Skip parsing for empty useragents or those not containing any letter
+	if !parser.StringContainsLetter(ua) {
 		return nil
 	}
 
+	// Try to search for the userAgent in the cache
+	if d.cache != nil {
+		if deviceInfo, hit := d.cache.Lookup(ua); hit {
+			return deviceInfo
+		}
+	}
+
+	// Start parsing
 	info := &DeviceInfo{
 		userAgent: ua,
 	}
 
 	info.bot = d.ParseBot(ua)
 	if info.IsBot() {
-		return info
+		return d.cacheDeviceInfo(ua, info)
 	}
 
 	info.os = d.ParseOs(ua)
@@ -266,6 +287,5 @@ func (d *DeviceDetector) Parse(ua string) *DeviceInfo {
 
 	d.parseInfo(info)
 
-	return info
+	return d.cacheDeviceInfo(ua, info)
 }
-
