@@ -255,6 +255,13 @@ func (d *DeviceDetector) cacheDeviceInfo(ua string, deviceInfo *DeviceInfo) *Dev
 	return deviceInfo
 }
 
+// Purge the cache. It may be used in case of dynamic update of the referenced regexes.
+func (d *DeviceDetector) PurgeCache() {
+	if d.cache != nil {
+		d.cache.Purge()
+	}
+}
+
 func (d *DeviceDetector) Parse(ua string) *DeviceInfo {
 	// Skip parsing for empty useragents or those not containing any letter
 	if !parser.StringContainsLetter(ua) {
