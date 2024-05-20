@@ -50,6 +50,9 @@ type DeviceDetector struct {
 	SkipBotDetection      bool
 }
 
+// Initialize the device detector.
+// - dir: path of the folder containing the regexes to parse the userAgent
+// - enableCache: if true, the cache will be enabled.
 func NewDeviceDetector(dir string, enableCache bool) (*DeviceDetector, error) {
 	vp, err := parser.NewVendor(filepath.Join(dir, parser.FixtureFileVendor))
 	if err != nil {
@@ -247,6 +250,7 @@ func (d *DeviceDetector) parseInfo(info *DeviceInfo) {
 	}
 }
 
+// Cache the deviceInfo if the cache is enabled
 func (d *DeviceDetector) cacheDeviceInfo(ua string, deviceInfo *DeviceInfo) *DeviceInfo {
 	if d.cache != nil {
 		d.cache.Add(ua, deviceInfo)
@@ -255,13 +259,15 @@ func (d *DeviceDetector) cacheDeviceInfo(ua string, deviceInfo *DeviceInfo) *Dev
 	return deviceInfo
 }
 
-// Purge the cache. It may be used in case of dynamic update of the referenced regexes.
+// Purge the cache.
+// It may be used in case of dynamic update of the referenced regexes.
 func (d *DeviceDetector) PurgeCache() {
 	if d.cache != nil {
 		d.cache.Purge()
 	}
 }
 
+// Parse the userAgent and retrieve information, if it is valid
 func (d *DeviceDetector) Parse(ua string) *DeviceInfo {
 	// Skip parsing for empty useragents or those not containing any letter
 	if !parser.StringContainsLetter(ua) {
