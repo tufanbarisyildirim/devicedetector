@@ -3,7 +3,7 @@ package devicedetector
 import (
 	regexp "github.com/dlclark/regexp2"
 
-	. "github.com/gamebtc/devicedetector/parser"
+	"github.com/gamebtc/devicedetector/parser"
 	"github.com/gamebtc/devicedetector/parser/client"
 	"github.com/gamebtc/devicedetector/parser/device"
 )
@@ -17,13 +17,13 @@ var (
 type DeviceInfo struct {
 	userAgent string
 	device.DeviceMatchResult
-	client    *client.ClientMatchResult
-	os        *OsMatchResult
-	bot       *BotMatchResult
+	client *client.ClientMatchResult
+	os     *parser.OsMatchResult
+	bot    *parser.BotMatchResult
 }
 
 func (d *DeviceInfo) GetDeviceType() int {
-	return GetDeviceType(d.Type)
+	return parser.GetDeviceType(d.Type)
 }
 
 func (d *DeviceInfo) IsBot() bool {
@@ -51,18 +51,18 @@ func (d *DeviceInfo) UsesMobileBrowser() bool {
 
 func (d *DeviceInfo) IsMobile() bool {
 	if d.Type != "" {
-		if deviceType := GetDeviceType(d.Type); DEVICE_TYPE_INVALID != deviceType {
+		if deviceType := parser.GetDeviceType(d.Type); parser.DEVICE_TYPE_INVALID != deviceType {
 			switch deviceType {
-			case DEVICE_TYPE_FEATURE_PHONE,
-				DEVICE_TYPE_SMARTPHONE,
-				DEVICE_TYPE_TABLET,
-				DEVICE_TYPE_PHABLET,
-				DEVICE_TYPE_CAMERA,
-				DEVICE_TYPE_PORTABLE_MEDIA_PAYER:
+			case parser.DEVICE_TYPE_FEATURE_PHONE,
+				parser.DEVICE_TYPE_SMARTPHONE,
+				parser.DEVICE_TYPE_TABLET,
+				parser.DEVICE_TYPE_PHABLET,
+				parser.DEVICE_TYPE_CAMERA,
+				parser.DEVICE_TYPE_PORTABLE_MEDIA_PAYER:
 				return true
-			case DEVICE_TYPE_TV,
-				DEVICE_TYPE_SMART_DISPLAY,
-				DEVICE_TYPE_CONSOLE:
+			case parser.DEVICE_TYPE_TV,
+				parser.DEVICE_TYPE_SMART_DISPLAY,
+				parser.DEVICE_TYPE_CONSOLE:
 				return false
 			}
 		}
@@ -89,17 +89,17 @@ func (d *DeviceInfo) IsDesktop() bool {
 		return false
 	}
 
-	if decodedFamily := GetOsFamily(d.os.ShortName); decodedFamily != "" {
-		return ArrayContainsString(desktopOsArray, decodedFamily)
+	if decodedFamily := parser.GetOsFamily(d.os.ShortName); decodedFamily != "" {
+		return parser.ArrayContainsString(desktopOsArray, decodedFamily)
 	}
 	return false
 }
 
-func (d *DeviceInfo) GetOs() *OsMatchResult {
+func (d *DeviceInfo) GetOs() *parser.OsMatchResult {
 	if d.os != nil {
 		return d.os
 	}
-	return &OsMatchResult{}
+	return &parser.OsMatchResult{}
 }
 
 func (d *DeviceInfo) GetClient() *client.ClientMatchResult {
@@ -129,7 +129,7 @@ func (d *DeviceInfo) GetBrand() string {
 }
 
 func (d *DeviceInfo) GetBrandName() string {
-	return GetFullName(d.Brand)
+	return parser.GetFullName(d.Brand)
 }
 
 func (d *DeviceInfo) GetModel() string {
@@ -140,13 +140,13 @@ func (d *DeviceInfo) GetUserAgent() string {
 	return d.userAgent
 }
 
-func (d *DeviceInfo) GetBot() *BotMatchResult {
+func (d *DeviceInfo) GetBot() *parser.BotMatchResult {
 	return d.bot
 }
 
 func (d *DeviceInfo) GetOsFamily() string {
 	if d.os != nil {
-		return GetOsFamily(d.os.ShortName)
+		return parser.GetOsFamily(d.os.ShortName)
 	}
 	return ""
 }

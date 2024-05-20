@@ -662,7 +662,7 @@ var deviceBrands = map[string]string{
 // Returns names of all available device types
 func GetAvailableDeviceTypeNames() []string {
 	keys := make([]string, 0, len(deviceTypes))
-	for k, _ := range deviceTypes {
+	for k := range deviceTypes {
 		keys = append(keys, k)
 	}
 	return keys
@@ -687,8 +687,7 @@ func GetDeviceType(deviceName string) int {
 
 // Returns the full brand name for the given short name
 func GetFullName(brandId string) string {
-	v, _ := deviceBrands[brandId]
-	return v
+	return deviceBrands[brandId]
 }
 
 func GetShortName(name string) string {

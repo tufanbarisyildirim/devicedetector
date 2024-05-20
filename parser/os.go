@@ -101,29 +101,29 @@ var OperatingSystems = map[string]string{
 
 // Operating system families mapped to the short codes of the associated operating systems
 var OsFamilies = map[string][]string{
-	`Android`:               []string{`AND`, `CYN`, `FIR`, `REM`, `RZD`, `MLD`, `MCD`, `YNS`},
-	`AmigaOS`:               []string{`AMG`, `MOR`},
-	`Apple TV`:              []string{`ATV`},
-	`BlackBerry`:            []string{`BLB`, `QNX`},
-	`Brew`:                  []string{`BMP`},
-	`BeOS`:                  []string{`BEO`, `HAI`},
-	`Chrome OS`:             []string{`COS`},
-	`Firefox OS`:            []string{`FOS`, `KOS`},
-	`Gaming Console`:        []string{`WII`, `PS3`},
-	`Google TV`:             []string{`GTV`},
-	`IBM`:                   []string{`OS2`},
-	`iOS`:                   []string{`IOS`},
-	`RISC OS`:               []string{`ROS`},
-	`GNU/Linux`:             []string{`LIN`, `ARL`, `DEB`, `KNO`, `MIN`, `UBT`, `KBT`, `XBT`, `LBT`, `FED`, `RHT`, `VLN`, `MDR`, `GNT`, `SAB`, `SLW`, `SSE`, `CES`, `BTR`, `SAF`, `ORD`, `TOS`},
-	`Mac`:                   []string{`MAC`},
-	`Mobile Gaming Console`: []string{`PSP`, `NDS`, `XBX`},
-	`Real-time OS`:          []string{`MTK`, `TDX`},
-	`Other Mobile`:          []string{`WOS`, `POS`, `SBA`, `TIZ`, `SMG`, `MAE`},
-	`Symbian`:               []string{`SYM`, `SYS`, `SY3`, `S60`, `S40`},
-	`Unix`:                  []string{`SOS`, `AIX`, `HPX`, `BSD`, `NBS`, `OBS`, `DFB`, `SYL`, `IRI`, `T64`, `INF`},
-	`WebTV`:                 []string{`WTV`},
-	`Windows`:               []string{`WIN`},
-	`Windows Mobile`:        []string{`WPH`, `WMO`, `WCE`, `WRT`, `WIO`},
+	`Android`:               {`AND`, `CYN`, `FIR`, `REM`, `RZD`, `MLD`, `MCD`, `YNS`},
+	`AmigaOS`:               {`AMG`, `MOR`},
+	`Apple TV`:              {`ATV`},
+	`BlackBerry`:            {`BLB`, `QNX`},
+	`Brew`:                  {`BMP`},
+	`BeOS`:                  {`BEO`, `HAI`},
+	`Chrome OS`:             {`COS`},
+	`Firefox OS`:            {`FOS`, `KOS`},
+	`Gaming Console`:        {`WII`, `PS3`},
+	`Google TV`:             {`GTV`},
+	`IBM`:                   {`OS2`},
+	`iOS`:                   {`IOS`},
+	`RISC OS`:               {`ROS`},
+	`GNU/Linux`:             {`LIN`, `ARL`, `DEB`, `KNO`, `MIN`, `UBT`, `KBT`, `XBT`, `LBT`, `FED`, `RHT`, `VLN`, `MDR`, `GNT`, `SAB`, `SLW`, `SSE`, `CES`, `BTR`, `SAF`, `ORD`, `TOS`},
+	`Mac`:                   {`MAC`},
+	`Mobile Gaming Console`: {`PSP`, `NDS`, `XBX`},
+	`Real-time OS`:          {`MTK`, `TDX`},
+	`Other Mobile`:          {`WOS`, `POS`, `SBA`, `TIZ`, `SMG`, `MAE`},
+	`Symbian`:               {`SYM`, `SYS`, `SY3`, `S60`, `S40`},
+	`Unix`:                  {`SOS`, `AIX`, `HPX`, `BSD`, `NBS`, `OBS`, `DFB`, `SYL`, `IRI`, `T64`, `INF`},
+	`WebTV`:                 {`WTV`},
+	`Windows`:               {`WIN`},
+	`Windows Mobile`:        {`WPH`, `WMO`, `WCE`, `WRT`, `WIO`},
 }
 
 const (
@@ -164,9 +164,9 @@ func NewOss(file string) (*Oss, error) {
 		return nil, err
 	}
 	ps := []*PlatformReg{
-		&PlatformReg{Name: PlatformTypeARM, Regular: Regular{Regex: "arm"}},
-		&PlatformReg{Name: PlatformTypeX64, Regular: Regular{Regex: "WOW64|x64|win64|amd64|x86_64"}},
-		&PlatformReg{Name: PlatformTypeX86, Regular: Regular{Regex: "i[0-9]86|i86pc"}},
+		{Name: PlatformTypeARM, Regular: Regular{Regex: "arm"}},
+		{Name: PlatformTypeX64, Regular: Regular{Regex: "WOW64|x64|win64|amd64|x86_64"}},
+		{Name: PlatformTypeX86, Regular: Regular{Regex: "i[0-9]86|i86pc"}},
 	}
 	for _, pp := range ps {
 		pp.Compile()

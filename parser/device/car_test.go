@@ -4,14 +4,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	. "github.com/gamebtc/devicedetector/parser"
-	"gotest.tools/assert"
+	"github.com/gamebtc/devicedetector/parser"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCarParse(t *testing.T) {
 	ps := NewCar(filepath.Join(dir, FixtureFileCar))
 	var list []*DeviceFixture
-	err := ReadYamlFile(`fixtures/car_browser.yml`, &list)
+	err := parser.ReadYamlFile(`fixtures/car_browser.yml`, &list)
 	if err != nil {
 		t.Error(err)
 	}
@@ -20,6 +20,6 @@ func TestCarParse(t *testing.T) {
 		ua := item.UserAgent
 		r := ps.Parse(ua)
 		test := item.GetDeviceMatchResult()
-		assert.DeepEqual(t, test, r)
+		require.EqualValues(t, test, r)
 	}
 }

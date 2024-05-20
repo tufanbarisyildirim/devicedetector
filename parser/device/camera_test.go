@@ -4,14 +4,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	. "github.com/gamebtc/devicedetector/parser"
-	"gotest.tools/assert"
+	"github.com/gamebtc/devicedetector/parser"
+	"github.com/stretchr/testify/require"
 )
 
 func TestCameraParse(t *testing.T) {
 	ps := NewCamera(filepath.Join(dir, FixtureFileCamera))
 	var list []*DeviceFixture
-	err := ReadYamlFile(`fixtures/camera.yml`, &list)
+	err := parser.ReadYamlFile(`fixtures/camera.yml`, &list)
 	if err != nil {
 		t.Error(err)
 	}
@@ -33,6 +33,6 @@ func TestCameraParse(t *testing.T) {
 		ua := item.UserAgent
 		r := ps.Parse(ua)
 		test := item.GetDeviceMatchResult()
-		assert.DeepEqual(t, test, r)
+		require.EqualValues(t, test, r)
 	}
 }

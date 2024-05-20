@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"gotest.tools/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestVendorParse(t *testing.T) {
@@ -22,6 +22,6 @@ func TestVendorParse(t *testing.T) {
 	for _, item := range list {
 		ua := item.UserAgent
 		r := vendorParser.Parse(ua)
-		assert.Equal(t, item.Vendor, r, ua)
+		require.Equal(t, item.Vendor, r, ua)
 	}
 }

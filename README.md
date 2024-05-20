@@ -6,13 +6,17 @@ DeviceDetector
 The Universal Device Detection library for golang that parses User Agents and detects devices (desktop, tablet, mobile, tv, cars, console, etc.), clients (browsers, feed readers, media players, PIMs, ...), operating systems, brands and models.
 This is a port of the popular PHP [device-detector](https://github.com/matomo-org/device-detector) library to golang  For the most part you can just follow the documentation for device-detector with no issue.
 
+### New features
+The following features have been introduced:
+1. cache: if enabled, the application will manage the results with an internal cache to avoid heavy regex operations if the userAgent has been already processed.
+
 Installation
 ------------
 
 The recommended way to install device detector
 
 ```
-go get github.com/gamebtc/devicedetector
+go get github.com/gianluca-marchini/devicedetector
 ```
 
 Examples
@@ -29,7 +33,8 @@ import (
 )
 
 func main() {
-	dd, err := NewDeviceDetector("regexes")
+	// The function takes 2 parameters: the path to the folder containing the regexes, and if the cache can be enabled
+	dd, err := NewDeviceDetector("regexes", false)
 	if err != nil {
 		log.Fatal(err)
 	}

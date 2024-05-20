@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	. "github.com/gamebtc/devicedetector/parser"
+	"github.com/gamebtc/devicedetector/parser"
 )
 
 type ClientMatchResult struct {
@@ -23,21 +23,21 @@ type ClientParser interface {
 }
 
 type ClientReg struct {
-	Regular `yaml:",inline" json:",inline"`
-	Name    string `yaml:"name" json:"name"`
-	Version string `yaml:"version" json:"version"`
+	parser.Regular `yaml:",inline" json:",inline"`
+	Name           string `yaml:"name" json:"name"`
+	Version        string `yaml:"version" json:"version"`
 }
 
 // Parses the current UA and checks whether it contains any client information
 type ClientParserAbstract struct {
 	Regexes      []*ClientReg
 	ParserName   string
-	overAllMatch Regular
+	overAllMatch parser.Regular
 }
 
 func (c *ClientParserAbstract) Load(file string) error {
 	var v []*ClientReg
-	err := ReadYamlFile(file, &v)
+	err := parser.ReadYamlFile(file, &v)
 	if err != nil {
 		return err
 	}
@@ -75,8 +75,8 @@ func (c *ClientParserAbstract) Parse(ua string) *ClientMatchResult {
 			if len(matches) > 0 {
 				return &ClientMatchResult{
 					Type:    c.ParserName,
-					Name:    BuildByMatch(regex.Name, matches),
-					Version: BuildVersion(regex.Version, matches),
+					Name:    parser.BuildByMatch(regex.Name, matches),
+					Version: parser.BuildVersion(regex.Version, matches),
 				}
 			}
 		}
@@ -90,7 +90,7 @@ func (c *ClientParserAbstract) GetAvailableClients() []string {
 	names := make([]string, 0, len(c.Regexes))
 	for _, regex := range c.Regexes {
 		n := regex.Name
-		if n != `$1` && ArrayContainsString(names, n) == false {
+		if n != `$1` && !parser.ArrayContainsString(names, n) {
 			names = append(names, n)
 		}
 	}

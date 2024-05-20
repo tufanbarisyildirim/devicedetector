@@ -9,7 +9,10 @@ func RegClientParser(name string, f func(string) ClientParser) {
 }
 
 func GetClientCreater(name string) func(string) ClientParser {
-	f, _ := clientFactory[name]
+	f, exists := clientFactory[name]
+	if !exists {
+		return nil
+	}
 	return f
 }
 
@@ -33,4 +36,3 @@ func NewClientParsers(dir string, names []string) []ClientParser {
 	}
 	return r
 }
-

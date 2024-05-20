@@ -4,14 +4,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	. "github.com/gamebtc/devicedetector/parser"
-	"gotest.tools/assert"
+	"github.com/gamebtc/devicedetector/parser"
+	"github.com/stretchr/testify/require"
 )
 
 func TestLibraryParse(t *testing.T) {
-	var ps= NewLibrary(filepath.Join(dir, FixtureFileLibrary))
+	var ps = NewLibrary(filepath.Join(dir, FixtureFileLibrary))
 	var list []*ClientFixture
-	err := ReadYamlFile(`fixtures/library.yml`, &list)
+	err := parser.ReadYamlFile(`fixtures/library.yml`, &list)
 	if err != nil {
 		t.Error(err)
 	}
@@ -19,6 +19,6 @@ func TestLibraryParse(t *testing.T) {
 	for _, item := range list {
 		ua := item.UserAgent
 		r := ps.Parse(ua)
-		assert.DeepEqual(t, item.ClientMatchResult, r)
+		require.EqualValues(t, item.ClientMatchResult, r)
 	}
 }

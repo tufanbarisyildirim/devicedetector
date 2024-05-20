@@ -3,7 +3,7 @@ package device
 import (
 	"path/filepath"
 
-	. "github.com/gamebtc/devicedetector/parser"
+	"github.com/gamebtc/devicedetector/parser"
 )
 
 const ParserNameHbbTv = `tv`
@@ -28,7 +28,7 @@ func NewHbbTv(fileName string) *HbbTv {
 // Device parser for hbbtv detection
 type HbbTv struct {
 	DeviceParserAbstract
-	hbbTvRegx Regular
+	hbbTvRegx parser.Regular
 }
 
 func (h *HbbTv) Parse(ua string) *DeviceMatchResult {

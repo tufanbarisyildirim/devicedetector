@@ -4,14 +4,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	. "github.com/gamebtc/devicedetector/parser"
-	"gotest.tools/assert"
+	"github.com/gamebtc/devicedetector/parser"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMediaPlayerParse(t *testing.T) {
 	ps := NewMediaPlayer(filepath.Join(dir, FixtureFileMediaPlayer))
 	var list []*ClientFixture
-	err := ReadYamlFile(`fixtures/mediaplayer.yml`, &list)
+	err := parser.ReadYamlFile(`fixtures/mediaplayer.yml`, &list)
 	if err != nil {
 		t.Error(err)
 	}
@@ -19,6 +19,6 @@ func TestMediaPlayerParse(t *testing.T) {
 	for _, item := range list {
 		ua := item.UserAgent
 		r := ps.Parse(ua)
-		assert.DeepEqual(t, item.ClientMatchResult, r)
+		require.EqualValues(t, item.ClientMatchResult, r)
 	}
 }

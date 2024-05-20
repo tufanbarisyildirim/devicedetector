@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	. "github.com/gamebtc/devicedetector/parser"
+	"github.com/gamebtc/devicedetector/parser"
 )
 
 const UnknownBrand = "Unknown"
@@ -21,27 +21,27 @@ type DeviceParser interface {
 }
 
 type Model struct {
-	Regular `yaml:",inline" json:",inline"`
-	Model   string `yaml:"model" json:"model"`
-	Device  string `yaml:"device" json:"device"` //mobile
-	Brand   string `yaml:"brand" json:"brand"`   //mobile
+	parser.Regular `yaml:",inline" json:",inline"`
+	Model          string `yaml:"model" json:"model"`
+	Device         string `yaml:"device" json:"device"` //mobile
+	Brand          string `yaml:"brand" json:"brand"`   //mobile
 }
 
 type DeviceReg struct {
-	Regular `yaml:",inline" json:",inline"`
-	Model   string   `yaml:"model" json:"model"`
-	Device  string   `yaml:"device" json:"device"`
-	Models  []*Model `yaml:"models" json:"models"`
+	parser.Regular `yaml:",inline" json:",inline"`
+	Model          string   `yaml:"model" json:"model"`
+	Device         string   `yaml:"device" json:"device"`
+	Models         []*Model `yaml:"models" json:"models"`
 }
 
 type DeviceParserAbstract struct {
 	Regexes      map[string]*DeviceReg
-	overAllMatch Regular
+	overAllMatch parser.Regular
 }
 
 func (d *DeviceParserAbstract) Load(file string) error {
 	var v map[string]*DeviceReg
-	err := ReadYamlFile(file, &v)
+	err := parser.ReadYamlFile(file, &v)
 	if err != nil {
 		return err
 	}
@@ -62,7 +62,7 @@ func (d *DeviceParserAbstract) PreMatch(ua string) bool {
 			return false
 		}
 		sortKeys := make([]string, 0, count)
-		for k, _ := range d.Regexes {
+		for k := range d.Regexes {
 			sortKeys = append(sortKeys, k)
 		}
 		sort.Strings(sortKeys)
@@ -98,7 +98,7 @@ func (d *DeviceParserAbstract) Parse(ua string) *DeviceMatchResult {
 		Type: regex.Device,
 	}
 	if brand != UnknownBrand {
-		brandId := FindBrand(brand)
+		brandId := parser.FindBrand(brand)
 		if brandId == "" {
 			return nil
 		}
@@ -106,15 +106,15 @@ func (d *DeviceParserAbstract) Parse(ua string) *DeviceMatchResult {
 	}
 
 	if regex.Model != "" {
-		r.Model = BuildModel(regex.Model, matches)
+		r.Model = parser.BuildModel(regex.Model, matches)
 	}
 
 	for _, modelRegex := range regex.Models {
 		modelMatches := modelRegex.MatchUserAgent(ua)
 		if len(modelMatches) > 0 {
-			r.Model = strings.TrimSpace(BuildModel(modelRegex.Model, modelMatches))
+			r.Model = strings.TrimSpace(parser.BuildModel(modelRegex.Model, modelMatches))
 			if modelRegex.Brand != "" {
-				if brandId := FindBrand(modelRegex.Brand); brandId != "" {
+				if brandId := parser.FindBrand(modelRegex.Brand); brandId != "" {
 					r.Brand = brandId
 				}
 			}
