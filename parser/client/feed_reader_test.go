@@ -4,14 +4,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	. "github.com/gamebtc/devicedetector/parser"
-	"gotest.tools/assert"
+	"github.com/gamebtc/devicedetector/parser"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFeedReaderParse(t *testing.T) {
 	ps := NewFeedReader(filepath.Join(dir, FixtureFileFeedReader))
 	var list []*ClientFixture
-	err := ReadYamlFile(`fixtures/feed_reader.yml`, &list)
+	err := parser.ReadYamlFile(`fixtures/feed_reader.yml`, &list)
 	if err != nil {
 		t.Error(err)
 	}
@@ -19,6 +19,6 @@ func TestFeedReaderParse(t *testing.T) {
 	for _, item := range list {
 		ua := item.UserAgent
 		r := ps.Parse(ua)
-		assert.DeepEqual(t, item.ClientMatchResult, r)
+		require.EqualValues(t, item.ClientMatchResult, r)
 	}
 }

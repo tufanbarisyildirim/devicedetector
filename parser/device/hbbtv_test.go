@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"gotest.tools/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHbbTvParse(t *testing.T) {
@@ -12,5 +12,5 @@ func TestHbbTvParse(t *testing.T) {
 	ua := `Opera/9.80 (Linux mips ; U; HbbTV/1.1.1 (; Philips; ; ; ; ) CE-HTML/1.0 NETTV/3.2.1; en) Presto/2.6.33 Version/10.70`
 
 	r := ps.Parse(ua)
-	assert.Equal(t, r.Type, ParserNameHbbTv)
+	require.Equal(t, r.Type, ParserNameHbbTv)
 }
