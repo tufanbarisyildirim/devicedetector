@@ -7,7 +7,10 @@ func RegDeviceParser(name string, f func(string) DeviceParser) {
 }
 
 func GetDeviceCreater(name string) func(string) DeviceParser {
-	f, _ := deviceFactory[name]
+	f, exists := deviceFactory[name]
+	if !exists {
+		return nil
+	}
 	return f
 }
 
@@ -27,4 +30,3 @@ func NewDeviceParsers(dir string, names []string) []DeviceParser {
 	}
 	return r
 }
-

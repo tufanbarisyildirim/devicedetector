@@ -2,10 +2,10 @@ package client
 
 import (
 	"path/filepath"
-	
+
 	gover "github.com/mcuadros/go-version"
 
-	. "github.com/gamebtc/devicedetector/parser"
+	"github.com/gamebtc/devicedetector/parser"
 )
 
 // Known browsers mapped to their internal short codes
@@ -277,20 +277,20 @@ var availableBrowsers = map[string]string{
 
 // Browser families mapped to the short codes of the associated browsers
 var browserFamilies = map[string][]string{
-	`Android Browser`    : []string{`AN`, `MU`},
-	`BlackBerry Browser` : []string{`BB`},
-	`Baidu`              : []string{`BD`, `BS`},
-	`Amiga`              : []string{`AV`, `AW`},
-	`Chrome`             : []string{`CH`, `BA`, `BR`, `CC`, `CD`, `CM`, `CI`, `CF`, `CN`, `CR`, `CP`, `DD`, `IR`, `RM`, `AO`, `TS`, `VI`, `PT`, `AS`, `TB`, `AD`, `SB`, `WP`, `I3`, `CV`, `WH`, `SZ`, `QW`, `LF`, `KW`, `2B`, `CE`, `EC`, `MT`, `MS`, `HA`, `OC`, `MZ`, `BM`, `KN`, `SW`, `M1`, `FA`, `TA`, `AH`, `CL`, `SU`, `EU`, `UB`, `LO`, `VG`, `TV`, `A0`, `1B`, `S4`, `EE`, `AE`, `VM`, `O0`, `TG`, `GB`, `SY`, `HH`, `YJ`, `LL`, `TU`, `XV`, `C2`},
-	`Firefox`            : []string{`FF`, `FE`, `FM`, `SX`, `FB`, `PX`, `MB`, `EI`, `WF`, `CU`, `TF`, `QM`, `FR`, `I4`, `GZ`, `MO`, `F1`, `BI`, `MN`, `BH`, `TO`, `OS`, `MY`, `FY`, `AX`, `C0`, `LH`, `S5`},
-	`Internet Explorer`  : []string{`IE`, `IM`, `PS`},
-	`Konqueror`          : []string{`KO`},
-	`NetFront`           : []string{`NF`},
-	`NetSurf`            : []string{`NE`},
-	`Nokia Browser`      : []string{`NB`, `NO`, `NV`, `DO`},
-	`Opera`              : []string{`OP`, `OM`, `OI`, `ON`, `OO`, `OG`, `OH`, `O1`, `OX`},
-	`Safari`             : []string{`SF`, `MF`, `SO`},
-	`Sailfish Browser`   : []string{`SA`},
+	`Android Browser`:    {`AN`, `MU`},
+	`BlackBerry Browser`: {`BB`},
+	`Baidu`:              {`BD`, `BS`},
+	`Amiga`:              {`AV`, `AW`},
+	`Chrome`:             {`CH`, `BA`, `BR`, `CC`, `CD`, `CM`, `CI`, `CF`, `CN`, `CR`, `CP`, `DD`, `IR`, `RM`, `AO`, `TS`, `VI`, `PT`, `AS`, `TB`, `AD`, `SB`, `WP`, `I3`, `CV`, `WH`, `SZ`, `QW`, `LF`, `KW`, `2B`, `CE`, `EC`, `MT`, `MS`, `HA`, `OC`, `MZ`, `BM`, `KN`, `SW`, `M1`, `FA`, `TA`, `AH`, `CL`, `SU`, `EU`, `UB`, `LO`, `VG`, `TV`, `A0`, `1B`, `S4`, `EE`, `AE`, `VM`, `O0`, `TG`, `GB`, `SY`, `HH`, `YJ`, `LL`, `TU`, `XV`, `C2`},
+	`Firefox`:            {`FF`, `FE`, `FM`, `SX`, `FB`, `PX`, `MB`, `EI`, `WF`, `CU`, `TF`, `QM`, `FR`, `I4`, `GZ`, `MO`, `F1`, `BI`, `MN`, `BH`, `TO`, `OS`, `MY`, `FY`, `AX`, `C0`, `LH`, `S5`},
+	`Internet Explorer`:  {`IE`, `IM`, `PS`},
+	`Konqueror`:          {`KO`},
+	`NetFront`:           {`NF`},
+	`NetSurf`:            {`NE`},
+	`Nokia Browser`:      {`NB`, `NO`, `NV`, `DO`},
+	`Opera`:              {`OP`, `OM`, `OI`, `ON`, `OO`, `OG`, `OH`, `O1`, `OX`},
+	`Safari`:             {`SF`, `MF`, `SO`},
+	`Sailfish Browser`:   {`SA`},
 }
 
 // Browsers that are available for mobile devices only
@@ -311,11 +311,11 @@ func GetBrowserFamily(browserLabel string) (string, bool) {
 
 // Returns if the given browser is mobile only
 func IsMobileOnlyBrowser(browser string) bool {
-	if ArrayContainsString(mobileOnlyBrowsers, browser) {
+	if parser.ArrayContainsString(mobileOnlyBrowsers, browser) {
 		return true
 	}
 	if v, ok := availableBrowsers[browser]; ok {
-		return ArrayContainsString(mobileOnlyBrowsers, v)
+		return parser.ArrayContainsString(mobileOnlyBrowsers, v)
 	}
 	return false
 }
@@ -328,17 +328,17 @@ type Engine struct {
 }
 
 type BrowserItem struct {
-	Regular `yaml:",inline" json:",inline"`
-	Name    string  `yaml:"name" json:"name"`
-	Version string  `yaml:"version" json:"version"`
-	Engine  *Engine `yaml:"engine" json:"engine"`
+	parser.Regular `yaml:",inline" json:",inline"`
+	Name           string  `yaml:"name" json:"name"`
+	Version        string  `yaml:"version" json:"version"`
+	Engine         *Engine `yaml:"engine" json:"engine"`
 }
 
-//  Client parser for browser detection
+// Client parser for browser detection
 type Browser struct {
-	Regexes      []*BrowserItem
-	engine       BrowserEngine
-	verCache     map[string]*Version
+	Regexes  []*BrowserItem
+	engine   BrowserEngine
+	verCache map[string]*Version
 }
 
 const ParserNameBrowser = `browser`
@@ -363,7 +363,7 @@ func NewBrowser(fileName string) *Browser {
 func (b *Browser) Load(file string) error {
 	b.verCache = make(map[string]*Version)
 	var v []*BrowserItem
-	err := ReadYamlFile(file, &v)
+	err := parser.ReadYamlFile(file, &v)
 	if err != nil {
 		return err
 	}
@@ -383,11 +383,11 @@ func (b *Browser) PreMatch(ua string) bool {
 func (b *Browser) Parse(ua string) *BrowserMatchResult {
 	for _, regex := range b.Regexes {
 		matches := regex.MatchUserAgent(ua)
-		if len(matches) > 0{
-			name := BuildByMatch(regex.Name, matches)
+		if len(matches) > 0 {
+			name := parser.BuildByMatch(regex.Name, matches)
 			for browserShort, browserName := range availableBrowsers {
-				if StringEqualIgnoreCase(name, browserName) {
-					version := BuildVersion(regex.Version, matches)
+				if parser.StringEqualIgnoreCase(name, browserName) {
+					version := parser.BuildVersion(regex.Version, matches)
 					engine := b.BuildEngine(regex.Engine, version, ua)
 					engineVersion := b.BuildEngineVersion(engine, ua)
 					return &BrowserMatchResult{

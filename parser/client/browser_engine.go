@@ -3,7 +3,7 @@ package client
 import (
 	"path/filepath"
 
-	. "github.com/gamebtc/devicedetector/parser"
+	"github.com/gamebtc/devicedetector/parser"
 )
 
 // Known browser engines mapped to their internal short codes
@@ -52,9 +52,9 @@ func (d *BrowserEngine) Parse(ua string) *ClientMatchResult {
 	for _, regex := range d.Regexes {
 		matches := regex.MatchUserAgent(ua)
 		if len(matches) > 0 {
-			name := BuildByMatch(regex.Name, matches)
+			name := parser.BuildByMatch(regex.Name, matches)
 			for _, v := range availableEngines {
-				if StringEqualIgnoreCase(name, v) {
+				if parser.StringEqualIgnoreCase(name, v) {
 					return &ClientMatchResult{
 						Type: ParserNameBrowserEngine,
 						Name: v,

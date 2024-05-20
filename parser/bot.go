@@ -9,7 +9,10 @@ func RegBotParser(name string, f func(string) BotParser) {
 }
 
 func GetBotCreater(name string) func(string) BotParser {
-	f, _ := botFactory[name]
+	f, exists := botFactory[name]
+	if !exists {
+		return nil
+	}
 	return f
 }
 
