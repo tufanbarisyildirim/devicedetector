@@ -1,4 +1,4 @@
-module github.com/gamebtc/devicedetector
+module github.com/gianluca-marchini/devicedetector
 
 go 1.22
 

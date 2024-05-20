@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/gamebtc/devicedetector/parser"
+	"github.com/gianluca-marchini/devicedetector/parser"
 	"github.com/stretchr/testify/require"
 )
 
