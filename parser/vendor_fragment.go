@@ -36,7 +36,8 @@ func NewVendor(file string) (*VendorFragments, error) {
 
 func (v *VendorFragments) Parse(ua string) string {
 	for brand, regexes := range v.vendorRegexes {
-		for _, regex := range regexes {
+		for i := 0; i < len(regexes); i++ {
+			regex := regexes[i]
 			if regex.IsMatchUserAgent(ua) {
 				return GetShortName(brand)
 			}

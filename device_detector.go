@@ -1,6 +1,7 @@
 package devicedetector
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -129,18 +130,33 @@ func (d *DeviceDetector) GetBotParsers() []parser.BotParser {
 
 func (d *DeviceDetector) ParseBot(ua string) *parser.BotMatchResult {
 	if !d.SkipBotDetection {
-		for _, parser := range d.botParsers {
-			parser.DiscardDetails(d.DiscardBotInformation)
-			if r := parser.Parse(ua); r != nil {
+		for i := 0; i < len(d.botParsers); i++ {
+			p := d.botParsers[i]
+			p.DiscardDetails(d.DiscardBotInformation)
+			if r := p.Parse(ua); r != nil {
 				return r
 			}
 		}
+
 	}
 	return nil
 }
 
 func (d *DeviceDetector) ParseOs(ua string) *parser.OsMatchResult {
-	for _, p := range d.osParsers {
+
+	for i := 0; i < len(d.osParsers); i++ {
+		p := d.osParsers[i]
+		if r := p.Parse(ua); r != nil {
+			return r
+		}
+	}
+
+	return nil
+}
+
+func (d *DeviceDetector) ParseClient(ua string) *client.ClientMatchResult {
+	for i := 0; i < len(d.clientParsers); i++ {
+		p := d.clientParsers[i]
 		if r := p.Parse(ua); r != nil {
 			return r
 		}
@@ -148,18 +164,10 @@ func (d *DeviceDetector) ParseOs(ua string) *parser.OsMatchResult {
 	return nil
 }
 
-func (d *DeviceDetector) ParseClient(ua string) *client.ClientMatchResult {
-	for _, parser := range d.clientParsers {
-		if r := parser.Parse(ua); r != nil {
-			return r
-		}
-	}
-	return nil
-}
-
 func (d *DeviceDetector) ParseDevice(ua string) *device.DeviceMatchResult {
-	for _, parser := range d.deviceParsers {
-		if r := parser.Parse(ua); r != nil {
+	for i := 0; i < len(d.deviceParsers); i++ {
+		p := d.deviceParsers[i]
+		if r := p.Parse(ua); r != nil {
 			return r
 		}
 	}
@@ -169,6 +177,7 @@ func (d *DeviceDetector) ParseDevice(ua string) *device.DeviceMatchResult {
 func (d *DeviceDetector) parseInfo(info *DeviceInfo) {
 	ua := info.userAgent
 	if r := d.ParseDevice(ua); r != nil {
+		fmt.Println("par", r.Type, r.Model, r.Brand)
 		info.Type = r.Type
 		info.Model = r.Model
 		info.Brand = r.Brand

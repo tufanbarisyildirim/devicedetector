@@ -178,7 +178,8 @@ func NewOss(file string) (*Oss, error) {
 }
 
 func (o *Oss) ParsePlatform(ua string) string {
-	for _, p := range o.platforms {
+	for i := 0; i < len(o.platforms); i++ {
+		p := o.platforms[i]
 		if p.IsMatchUserAgent(ua) {
 			return p.Name
 		}
@@ -208,7 +209,8 @@ func (o *Oss) PreMatch(ua string) bool {
 func (o *Oss) Parse(ua string) *OsMatchResult {
 	var matches []string
 	var osRegex *OsReg
-	for _, osRegex = range o.Regexes {
+	for i := 0; i < len(o.Regexes); i++ {
+		osRegex = o.Regexes[i]
 		matches = osRegex.MatchUserAgent(ua)
 		if len(matches) > 0 {
 			break

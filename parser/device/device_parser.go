@@ -109,7 +109,8 @@ func (d *DeviceParserAbstract) Parse(ua string) *DeviceMatchResult {
 		r.Model = parser.BuildModel(regex.Model, matches)
 	}
 
-	for _, modelRegex := range regex.Models {
+	for i := 0; i < len(regex.Models); i++ {
+		modelRegex := regex.Models[i]
 		modelMatches := modelRegex.MatchUserAgent(ua)
 		if len(modelMatches) > 0 {
 			r.Model = strings.TrimSpace(parser.BuildModel(modelRegex.Model, modelMatches))
@@ -124,5 +125,6 @@ func (d *DeviceParserAbstract) Parse(ua string) *DeviceMatchResult {
 			return r
 		}
 	}
+
 	return r
 }

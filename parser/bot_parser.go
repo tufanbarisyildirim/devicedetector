@@ -85,12 +85,14 @@ func (b *BotParserAbstract) Parse(ua string) *BotMatchResult {
 		if b.discardDetails {
 			return EmptyBotMatchResult
 		}
-		for _, regex := range b.Regexes {
+		for i := 0; i < len(b.Regexes); i++ {
+			regex := b.Regexes[i]
 			matches := regex.MatchUserAgent(ua)
 			if len(matches) > 0 {
 				return &regex.BotMatchResult
 			}
 		}
+
 	}
 	return nil
 }
