@@ -2,10 +2,8 @@ package devicedetector
 
 import (
 	"strconv"
-	"sync"
 	"testing"
 
-	regexp "github.com/dlclark/regexp2"
 	"github.com/gianluca-marchini/devicedetector/parser"
 	"github.com/gianluca-marchini/devicedetector/parser/client"
 	"github.com/gianluca-marchini/devicedetector/parser/device"
@@ -202,22 +200,21 @@ func TestRegThread(t *testing.T) {
 			lists = append(lists, list)
 		}
 	}
-	rs := []*regexp.Regexp{adrMobReg, touchReg, adrTabReg, chrMobReg, chrTabReg, opaTabReg, opaTvReg}
-	var wg sync.WaitGroup
-	for i := 0; i < 10; i++ {
-		for _, list := range lists {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				for _, f := range list {
-					ua := f.UserAgent
-					for _, reg := range rs {
-						reg.MatchString(ua)
-						reg.FindStringMatch(ua)
-					}
-				}
-			}()
+	//	rs := []*regexp.Regexp{adrMobReg, touchReg, adrTabReg, chrMobReg, chrTabReg, opaTabReg, opaTvReg}
+
+	for _, list := range lists {
+		for _, f := range list {
+			ua := f.UserAgent
+			di := dd.Parse(ua)
+			require.Equal(t, f.Device.Model, di.Model, ua)
+			require.Equal(t, f.Device.Type, di.Type, ua)
+			require.Equal(t, f.Device.Brand, di.Brand, ua)
+
+			//for _, reg := range rs {
+			//	reg.MatchString(ua)
+			//	reg.FindStringMatch(ua)
+			//}
 		}
 	}
-	wg.Wait()
+
 }

@@ -1,7 +1,6 @@
 package devicedetector
 
 import (
-	"fmt"
 	"path/filepath"
 	"strings"
 
@@ -177,7 +176,6 @@ func (d *DeviceDetector) ParseDevice(ua string) *device.DeviceMatchResult {
 func (d *DeviceDetector) parseInfo(info *DeviceInfo) {
 	ua := info.userAgent
 	if r := d.ParseDevice(ua); r != nil {
-		fmt.Println("par", r.Type, r.Model, r.Brand)
 		info.Type = r.Type
 		info.Model = r.Model
 		info.Brand = r.Brand

@@ -9690,6 +9690,8 @@ Samsung:
     # explicit smartphone models
     - regex: '(?:SAMSUNG-)?SM-G850[AMSWY]'
       model: 'GALAXY Alpha'
+    - regex: '(?:SAMSUNG)?SM-A256[AE]'
+      model: "GALAXY A25"
     - regex: '(?:SAMSUNG-)?GT-B5330'
       model: 'GALAXY Chat'
     - regex: '(?:SAMSUNG-)?SM-A605K'
