@@ -176,7 +176,7 @@ Philips:
 
 # Samsung
 Samsung:
-  regex: 'Samsung|Maple_2011'
+  regex: 'SmartTV|Maple_2011'
   device: 'tv'
   models:
     - regex: 'SmartTV(201[2-9])'
